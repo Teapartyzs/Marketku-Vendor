@@ -1,16 +1,10 @@
-# marketku_vendor
+# Marketku From Vendor Side (Just a personal project) 💕❤️
 
-A new Flutter project.
+Marketku is a mobile-based marketplace application built using the Flutter framework. This app offers a wide variety of exciting products and trusted vendors.
 
-## Getting Started
+## How to run?
+- Clone this project
+- Then open your IDE
+- Last, run this code in your terminal "flutter pub get"
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# UNDER CONSTRUCTION 🏗️🚧
