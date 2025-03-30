@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,30 @@ class _UploadScreenState extends State<UploadScreen> {
       setState(() {
         images.add(File(takePicture.path));
       });
+    }
+  }
+
+  late String productName;
+  late int productPrice;
+  late String vendorId;
+  late String fullname;
+  late int quantity;
+  late String description;
+  late String category;
+  late String subCategory;
+  late bool popular;
+  late bool recommend;
+
+  uploadProduct() async {
+    final List<String> paths = [];
+    if (images.isNotEmpty) {
+      final cloudinary = CloudinaryPublic("dhpriqf77", "r0gdemwm");
+      for (var i = 0; i < images.length; i++) {
+        CloudinaryResponse cloudinaryResponse = await cloudinary
+            .uploadFile(CloudinaryFile.fromFile(images[i].path));
+
+        paths.add(cloudinaryResponse.secureUrl);
+      }
     }
   }
 
