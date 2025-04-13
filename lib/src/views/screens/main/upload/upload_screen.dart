@@ -1,25 +1,26 @@
-import 'dart:ffi';
 import 'dart:io';
-
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:marketku_vendor/global_variables.dart';
 import 'package:marketku_vendor/src/controllers/dio_controller.dart';
 import 'package:marketku_vendor/src/models/category.dart';
 import 'package:marketku_vendor/src/models/category_sub.dart';
+import 'package:marketku_vendor/src/models/product.dart';
+import 'package:marketku_vendor/src/providers/vendor_provider.dart';
 import 'package:marketku_vendor/src/views/components/future_builder_setup.dart';
 import 'package:marketku_vendor/src/views/components/input_form.dart';
 
-class UploadScreen extends StatefulWidget {
+class UploadScreen extends ConsumerStatefulWidget {
   const UploadScreen({super.key});
 
   @override
-  State<UploadScreen> createState() => _UploadScreenState();
+  ConsumerState<UploadScreen> createState() => _UploadScreenState();
 }
 
-class _UploadScreenState extends State<UploadScreen> {
+class _UploadScreenState extends ConsumerState<UploadScreen> {
   final formKey = GlobalKey<FormState>();
   late final Future<List<Category>> categoryData;
   late final Future<List<CategorySub>> categorySubData;
@@ -58,12 +59,33 @@ class _UploadScreenState extends State<UploadScreen> {
   uploadProduct() async {
     final List<String> paths = [];
     if (images.isNotEmpty) {
-      final cloudinary = CloudinaryPublic("dhpriqf77", "r0gdemwm");
-      for (var i = 0; i < images.length; i++) {
-        CloudinaryResponse cloudinaryResponse = await cloudinary
-            .uploadFile(CloudinaryFile.fromFile(images[i].path));
+      if (selectedCategory!.id.isNotEmpty && selectedCategory!.id.isNotEmpty) {
+        final cloudinary = CloudinaryPublic("dhpriqf77", "r0gdemwm");
+        for (var i = 0; i < images.length; i++) {
+          CloudinaryResponse cloudinaryResponse = await cloudinary
+              .uploadFile(CloudinaryFile.fromFile(images[i].path));
 
-        paths.add(cloudinaryResponse.secureUrl);
+          paths.add(cloudinaryResponse.secureUrl);
+        }
+        final product = Product(
+                id: '',
+                productName: productName,
+                productPrice: productPrice,
+                vendorId: vendorId,
+                fullname: fullname,
+                quantity: quantity,
+                description: description,
+                category: selectedCategory!.name,
+                subCategory: selectedCategory!.name,
+                images: paths,
+                popular: false,
+                recommend: false)
+            .toMap();
+
+        await "$url/api/add-product".postData(product, (result, message) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(message)));
+        });
       }
     }
   }
@@ -113,7 +135,9 @@ class _UploadScreenState extends State<UploadScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: InputForm(
                 keyboardType: TextInputType.text,
-                newValue: (value) {},
+                newValue: (value) {
+                  productName = value;
+                },
                 label: "Product Name",
                 hint: "Input your product name ",
                 maxLines: 1,
@@ -124,7 +148,9 @@ class _UploadScreenState extends State<UploadScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: InputForm(
                 keyboardType: TextInputType.number,
-                newValue: (value) {},
+                newValue: (value) {
+                  productPrice = int.parse(value);
+                },
                 label: "Price",
                 hint: "Input your product price ",
                 maxLines: 1,
@@ -135,7 +161,9 @@ class _UploadScreenState extends State<UploadScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: InputForm(
                 keyboardType: TextInputType.number,
-                newValue: (value) {},
+                newValue: (value) {
+                  quantity = int.parse(value);
+                },
                 label: "Quantity",
                 hint: "Input your product quantity",
                 maxLines: 1,
@@ -210,7 +238,9 @@ class _UploadScreenState extends State<UploadScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: InputForm(
                 keyboardType: TextInputType.text,
-                newValue: (value) {},
+                newValue: (value) {
+                  description = value;
+                },
                 label: "Description",
                 hint: "Input your product description",
                 maxLines: 3,
@@ -222,8 +252,12 @@ class _UploadScreenState extends State<UploadScreen> {
               child: SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: () {
-                      if (formKey.currentState!.validate()) {}
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        fullname = ref.read(vendorProvider)!.fullname;
+                        vendorId = ref.read(vendorProvider)!.id;
+                        uploadProduct();
+                      }
                     },
                     style: FilledButton.styleFrom(
                         backgroundColor: Colors.blueAccent),
