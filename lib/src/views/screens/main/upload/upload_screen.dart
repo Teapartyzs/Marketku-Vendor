@@ -28,6 +28,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   CategorySub? selectedCategorySub;
   bool isPicked = false;
   final imagePicker = ImagePicker();
+  bool isSubmit = false;
 
   List<File> images = [];
 
@@ -254,14 +255,27 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                   child: FilledButton(
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
+                        setState(() {
+                          isSubmit = true;
+                        });
                         fullname = ref.read(vendorProvider)!.fullname;
                         vendorId = ref.read(vendorProvider)!.id;
-                        uploadProduct();
+                        await uploadProduct();
+                        images.clear;
+                        selectedCategory = null;
+                        selectedCategorySub = null;
+                        setState(() {
+                          isSubmit = false;
+                        });
                       }
                     },
                     style: FilledButton.styleFrom(
                         backgroundColor: Colors.blueAccent),
-                    child: Text("Submit"),
+                    child: isSubmit
+                        ? CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : Text("Submit"),
                   )),
             )
           ],
